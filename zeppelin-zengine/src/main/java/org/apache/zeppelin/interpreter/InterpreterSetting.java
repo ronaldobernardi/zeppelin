@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -358,6 +359,18 @@ public class InterpreterSetting {
     return this;
   }
 
+  public InterpreterInfo getInterpreterInfo(String name) {
+    Iterator it = this.interpreterInfos.iterator();
+    while (it.hasNext()) {
+      InterpreterInfo info = (InterpreterInfo) it.next();
+      if (StringUtils.equals(info.getName(), name)) {
+        return info;
+      }
+    }
+
+    return null;
+  }
+
   public RecoveryStorage getRecoveryStorage() {
     return recoveryStorage;
   }
@@ -657,6 +670,10 @@ public class InterpreterSetting {
   public String getLauncherPlugin() {
     if (isRunningOnKubernetes()) {
       return "K8sStandardInterpreterLauncher";
+    } else if (isRunningOnCluster()) {
+      return "ClusterInterpreterLauncher";
+    } if (isRunningOnDocker()) {
+      return "DockerInterpreterLauncher";
     } else {
       if (group.equals("spark")) {
         return "SparkInterpreterLauncher";
@@ -668,6 +685,15 @@ public class InterpreterSetting {
 
   private boolean isRunningOnKubernetes() {
     return conf.getRunMode() == ZeppelinConfiguration.RUN_MODE.K8S;
+  }
+
+
+  private boolean isRunningOnCluster() {
+    return conf.isClusterMode();
+  }
+
+  private boolean isRunningOnDocker() {
+    return conf.getRunMode() == ZeppelinConfiguration.RUN_MODE.DOCKER;
   }
 
   public boolean isUserAuthorized(List<String> userAndRoles) {

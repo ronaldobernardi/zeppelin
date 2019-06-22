@@ -583,7 +583,7 @@ public class NotebookServer extends WebSocketServlet
 
   public void broadcastReloadedNoteList(NotebookSocket conn, ServiceContext context)
       throws IOException {
-    getNotebookService().listNotesInfo(false, context,
+    getNotebookService().listNotesInfo(true, context,
         new WebSocketServiceCallback<List<NoteInfo>>(conn) {
           @Override
           public void onSuccess(List<NoteInfo> notesInfo,
@@ -652,7 +652,10 @@ public class NotebookServer extends WebSocketServlet
       try {
         interpreterGroup = findInterpreterGroupForParagraph(note, paragraph.getId());
       } catch (Exception e) {
-        e.printStackTrace();
+        LOG.warn(e.getMessage(), e);
+      }
+      if (null == interpreterGroup) {
+        return;
       }
       RemoteAngularObjectRegistry registry = (RemoteAngularObjectRegistry)
           interpreterGroup.getAngularObjectRegistry();
